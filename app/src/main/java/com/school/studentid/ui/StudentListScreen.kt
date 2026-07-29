@@ -1,6 +1,5 @@
 package com.school.studentid.ui
 
-import android.content.ClipData
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -65,38 +64,28 @@ fun StudentListScreen(
             Button(
                 onClick = {
                     scope.launch {
-                        val files = viewModel.exportForSharing()
-                        if (files.isEmpty()) {
+                        val pdfFile = viewModel.exportPdf()
+                        if (pdfFile == null) {
                             snackbarHostState.showSnackbar("No students to export yet")
                             return@launch
                         }
 
-                        val uris = files.map { f ->
-                            FileProvider.getUriForFile(context, "com.school.studentid.fileprovider", f)
-                        }
-
-                        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-                            type = "*/*"
-                            putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
+                        val uri = FileProvider.getUriForFile(
+                            context, "com.school.studentid.fileprovider", pdfFile
+                        )
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "application/pdf"
+                            putExtra(Intent.EXTRA_STREAM, uri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
-
-                        // Explicitly grant read permission on every attached file
-                        // (needed for multiple attachments to work reliably).
-                        val clip = ClipData.newUri(context.contentResolver, "Student data", uris.first())
-                        for (i in 1 until uris.size) {
-                            clip.addItem(ClipData.Item(uris[i]))
-                        }
-                        intent.clipData = clip
-
-                        context.startActivity(Intent.createChooser(intent, "Share student data & photos"))
+                        context.startActivity(Intent.createChooser(intent, "Share student PDF"))
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Export & Share (data + photos)")
+                Text("Export & Share PDF")
             }
 
             Spacer(Modifier.height(12.dp))
