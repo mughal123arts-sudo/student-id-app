@@ -61,5 +61,8 @@ dependencies {
     // Image loading for student photos
     implementation("io.coil-kt:coil-compose:2.5.0")
 
+    // Read/apply EXIF orientation when optimizing photos
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
