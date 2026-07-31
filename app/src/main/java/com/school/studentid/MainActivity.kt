@@ -67,15 +67,7 @@ fun AppNavHost(viewModel: StudentViewModel) {
             HomeScreen(
                 viewModel = viewModel,
                 onFolderClick = { className -> navController.navigate("list/${Uri.encode(className)}") },
-                onSettingsClick = { navController.navigate("settings") },
-                onStudentClick = { student ->
-                    val folder = if (ClassConstants.PREDEFINED_CLASSES.contains(student.className)) {
-                        student.className
-                    } else {
-                        ClassConstants.OTHER_CLASSES
-                    }
-                    navController.navigate("student?studentId=${student.id}&classFolder=${Uri.encode(folder)}")
-                }
+                onSettingsClick = { navController.navigate("settings") }
             )
         }
 
