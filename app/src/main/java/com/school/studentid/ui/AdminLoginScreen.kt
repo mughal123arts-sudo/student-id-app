@@ -23,8 +23,8 @@ private const val ADMIN_PASSWORD = "admin123"
 
 @Composable
 fun AdminLoginScreen(onLoginSuccess: () -> Unit) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf(ADMIN_USERNAME) }
+    var password by remember { mutableStateOf(ADMIN_PASSWORD) }
     var error by remember { mutableStateOf<String?>(null) }
 
     Box(
