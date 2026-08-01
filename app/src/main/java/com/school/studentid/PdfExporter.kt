@@ -6,16 +6,15 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.RectF
 import android.graphics.pdf.PdfDocument
 import java.io.File
 import java.io.FileOutputStream
 
 /**
- * Builds a single PDF containing one page per student, styled like a proper
- * ID card: a colored header band, a bordered card panel with a rounded photo
- * box, and clean values below (no field labels).
+ * Builds a single PDF containing one page per student: a simple, plain
+ * layout — school name, photo, then values (no colored bands, no card
+ * background, no field labels).
  *
  * Uses Android's built-in PdfDocument so no extra library/dependency is
  * needed. Photos are decoded at only the resolution actually needed for
@@ -24,11 +23,6 @@ import java.io.FileOutputStream
  */
 object PdfExporter {
 
-    // ---- Customize these two to match your school ----
-    private const val SCHOOL_NAME = "School Name"
-    private val HEADER_COLOR = Color.rgb(21, 63, 130)   // navy blue band
-    private val ACCENT_COLOR = Color.rgb(21, 63, 130)   // borders / accents
-
     // Roughly A4 proportions at ~150dpi.
     private const val PAGE_WIDTH = 1240
     private const val PAGE_HEIGHT = 1754
@@ -36,12 +30,14 @@ object PdfExporter {
     fun generateStudentsPdf(context: Context, students: List<Student>): File? {
         if (students.isEmpty()) return null
 
+        val schoolName = AppPreferences.getSchoolName(context).ifBlank { "" }
+
         val document = PdfDocument()
         return try {
             students.forEachIndexed { index, student ->
                 val pageInfo = PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, index + 1).create()
                 val page = document.startPage(pageInfo)
-                drawStudentPage(page.canvas, student, index + 1, students.size)
+                drawStudentPage(page.canvas, student, schoolName, index + 1, students.size)
                 document.finishPage(page)
             }
 
@@ -56,37 +52,25 @@ object PdfExporter {
         }
     }
 
-    private fun drawStudentPage(canvas: Canvas, student: Student, pageNumber: Int, totalPages: Int) {
+    private fun drawStudentPage(canvas: Canvas, student: Student, schoolName: String, pageNumber: Int, totalPages: Int) {
         val centerX = PAGE_WIDTH / 2f
+        var y = 100f
 
-        // ---------------- Header band ----------------
-        val headerHeight = 190f
-        val headerPaint = Paint().apply { color = HEADER_COLOR }
-        canvas.drawRect(0f, 0f, PAGE_WIDTH.toFloat(), headerHeight, headerPaint)
-
-        val schoolNamePaint = Paint().apply {
-            color = Color.WHITE; textSize = 50f; isFakeBoldText = true
-            isAntiAlias = true; textAlign = Paint.Align.CENTER
+        // ---------------- Plain header (no colored band) ----------------
+        if (schoolName.isNotBlank()) {
+            val schoolNamePaint = Paint().apply {
+                color = Color.BLACK; textSize = 44f; isFakeBoldText = true
+                isAntiAlias = true; textAlign = Paint.Align.CENTER
+            }
+            canvas.drawText(schoolName, centerX, y, schoolNamePaint)
+            y += 50f
         }
+
         val subtitlePaint = Paint().apply {
-            color = Color.WHITE; textSize = 30f; isAntiAlias = true; textAlign = Paint.Align.CENTER
+            color = Color.DKGRAY; textSize = 28f; isAntiAlias = true; textAlign = Paint.Align.CENTER
         }
-        canvas.drawText(SCHOOL_NAME, centerX, 90f, schoolNamePaint)
-        canvas.drawText("STUDENT ID CARD", centerX, 140f, subtitlePaint)
-
-        // ---------------- Card panel ----------------
-        val cardLeft = 100f
-        val cardRight = PAGE_WIDTH - 100f
-        val cardTop = headerHeight + 60f
-        val cardBottom = PAGE_HEIGHT - 140f
-        val cardRect = RectF(cardLeft, cardTop, cardRight, cardBottom)
-
-        val cardBgPaint = Paint().apply { color = Color.rgb(247, 249, 252) }
-        val cardBorderPaint = Paint().apply { style = Paint.Style.STROKE; color = ACCENT_COLOR; strokeWidth = 3f }
-        canvas.drawRoundRect(cardRect, 24f, 24f, cardBgPaint)
-        canvas.drawRoundRect(cardRect, 24f, 24f, cardBorderPaint)
-
-        var y = cardTop + 90f
+        canvas.drawText("Student ID Card", centerX, y, subtitlePaint)
+        y += 70f
 
         // ---------------- Photo (small, memory-efficient decode) ----------------
         val photoSize = 380f
@@ -102,20 +86,16 @@ object PdfExporter {
                 // keeps memory use low and keeps the PDF file small.
                 val bitmap = decodeBitmapForPdf(file.absolutePath, photoSize.toInt())
                 if (bitmap != null) {
-                    val clipPath = Path().apply { addRoundRect(photoRect, 20f, 20f, Path.Direction.CW) }
-                    canvas.save()
-                    canvas.clipPath(clipPath)
                     val photoPaint = Paint().apply { isAntiAlias = true; isFilterBitmap = true }
                     canvas.drawBitmap(bitmap, null, photoRect, photoPaint)
-                    canvas.restore()
                     bitmap.recycle()
                     photoDrawn = true
                 }
             }
         }
 
-        val photoBorderPaint = Paint().apply { style = Paint.Style.STROKE; color = ACCENT_COLOR; strokeWidth = 4f }
-        canvas.drawRoundRect(photoRect, 20f, 20f, photoBorderPaint)
+        val photoBorderPaint = Paint().apply { style = Paint.Style.STROKE; color = Color.BLACK; strokeWidth = 2f }
+        canvas.drawRect(photoRect, photoBorderPaint)
 
         if (!photoDrawn) {
             val noPhotoPaint = Paint().apply {
@@ -128,19 +108,15 @@ object PdfExporter {
 
         // ---------------- Student name ----------------
         val namePaint = Paint().apply {
-            color = Color.BLACK; textSize = 42f; isFakeBoldText = true
+            color = Color.BLACK; textSize = 40f; isFakeBoldText = true
             isAntiAlias = true; textAlign = Paint.Align.CENTER
         }
         canvas.drawText(student.studentName.ifBlank { "-" }, centerX, y, namePaint)
-        y += 50f
+        y += 60f
 
-        val dividerPaint = Paint().apply { color = Color.LTGRAY; strokeWidth = 2f }
-        canvas.drawLine(cardLeft + 60f, y, cardRight - 60f, y, dividerPaint)
-        y += 55f
-
-        // ---------------- Remaining details — values only, no labels ----------------
+        // ---------------- Remaining details — plain values, no labels, no lines ----------------
         val valuePaint = Paint().apply {
-            color = Color.DKGRAY; textSize = 32f; isAntiAlias = true; textAlign = Paint.Align.CENTER
+            color = Color.DKGRAY; textSize = 30f; isAntiAlias = true; textAlign = Paint.Align.CENTER
         }
 
         val values = listOf(
@@ -152,7 +128,7 @@ object PdfExporter {
 
         values.forEach { value ->
             canvas.drawText(value.ifBlank { "-" }, centerX, y, valuePaint)
-            y += 55f
+            y += 50f
         }
 
         // ---------------- Notes (wrapped, only if present) ----------------
@@ -161,9 +137,9 @@ object PdfExporter {
             val notesPaint = Paint().apply {
                 color = Color.DKGRAY; textSize = 26f; isAntiAlias = true; textAlign = Paint.Align.CENTER
             }
-            val maxWidth = cardRight - cardLeft - 120f
+            val maxWidth = PAGE_WIDTH - 200f
             wrapText(student.notes, notesPaint, maxWidth).forEach { line ->
-                if (y < cardBottom - 30f) {
+                if (y < PAGE_HEIGHT - 100f) {
                     canvas.drawText(line, centerX, y, notesPaint)
                     y += 36f
                 }
@@ -172,9 +148,9 @@ object PdfExporter {
 
         // ---------------- Footer ----------------
         val footerPaint = Paint().apply {
-            color = Color.GRAY; textSize = 24f; isAntiAlias = true; textAlign = Paint.Align.CENTER
+            color = Color.GRAY; textSize = 22f; isAntiAlias = true; textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("Page $pageNumber of $totalPages", centerX, PAGE_HEIGHT - 60f, footerPaint)
+        canvas.drawText("Page $pageNumber of $totalPages", centerX, PAGE_HEIGHT - 50f, footerPaint)
     }
 
     /** Simple word-wrap so long Notes text doesn't run off the page. */
@@ -198,9 +174,8 @@ object PdfExporter {
 
     /**
      * Decodes a photo downsampled to roughly [reqSize] pixels, in RGB_565
-     * (photos need no alpha channel) — this is the key fix for the large
-     * export size: previously the full ~800px optimized photo was decoded
-     * and embedded even though the PDF only displays it at ~380pt.
+     * (photos need no alpha channel) — keeps memory use and the final PDF
+     * file size small.
      */
     private fun decodeBitmapForPdf(path: String, reqSize: Int): Bitmap? {
         val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
