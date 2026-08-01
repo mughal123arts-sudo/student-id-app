@@ -9,7 +9,7 @@ package com.school.studentid
 object ClassConstants {
 
     val PREDEFINED_CLASSES = listOf(
-        "Playgroup (PG)",
+        "Playgroup",
         "Montessori",
         "Nursery",
         "KG",
