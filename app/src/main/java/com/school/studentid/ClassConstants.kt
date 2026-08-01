@@ -9,11 +9,11 @@ package com.school.studentid
 object ClassConstants {
 
     val PREDEFINED_CLASSES = listOf(
-        "KG",
-        "Playgroup",
+        "Playgroup (PG)",
         "Montessori",
-        "Prep",
         "Nursery",
+        "KG",
+        "Prep",
         "Class 1",
         "Class 2",
         "Class 3",
@@ -22,9 +22,9 @@ object ClassConstants {
         "Class 6",
         "Class 7",
         "Class 8",
-        "Pre-9th"
         "Class 9",
         "Class 10",
+        "Pre-9th"
     )
 
     const val OTHER_CLASSES = "Other Classes"
