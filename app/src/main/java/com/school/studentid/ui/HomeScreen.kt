@@ -56,10 +56,10 @@ fun HomeScreen(
                     .background(Brush.horizontalGradient(listOf(AppPrimary, AppPrimaryContainer)))
             ) {
                 TopAppBar(
-                    title = { Text("Home", color = Color.White, fontWeight = FontWeight.Bold) },
+                    title = { Text("Home", color = com.school.studentid.ui.theme.AppTextColor, fontWeight = FontWeight.Bold) },
                     actions = {
                         IconButton(onClick = onSettingsClick) {
-                            Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White)
+                            Icon(Icons.Default.Settings, contentDescription = "Settings", tint = com.school.studentid.ui.theme.AppTextColor)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
