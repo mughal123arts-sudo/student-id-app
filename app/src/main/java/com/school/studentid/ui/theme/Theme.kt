@@ -11,19 +11,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 // ---- App color palette ----
-val AppPrimary = Color(0xFF2E8B57)          // Sea Green
-val AppPrimaryContainer = Color(0xFF1B5E20)
+val AppPrimary = Color(0xFFD6D300)
+val AppPrimaryContainer = Color(0xFFFFDE6F)
 val AppBackground = Color(0xFFE8F5E9)       // Light Sea Green background
 val AppSurface = Color(0xFFFFFFFF)
-val AppFolderCardColor = Color(0xFFFFD8A8)  // Light Orange
+val AppFolderCardColor = Color(0xFFFCF2DC)
 val AppButtonColor = Color(0xFFF4A261)      // Orange
 val AppTextColor = Color(0xFF1B4332)
 
 private val AppColorScheme = lightColorScheme(
     primary = AppPrimary,
-    onPrimary = Color.White,
+    onPrimary = AppTextColor,
     primaryContainer = AppPrimaryContainer,
-    onPrimaryContainer = Color.White,
+    onPrimaryContainer = AppTextColor,
     secondary = AppButtonColor,
     onSecondary = Color.White,
     background = AppBackground,
