@@ -11,26 +11,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 // ---- App color palette ----
-val AppPrimary = Color(0xFFD6D300)
-val AppPrimaryContainer = Color(0xFFFFDE6F)
-val AppBackground = Color(0xFFE8F5E9)       // Light Sea Green background
+// ---- App color palette (soft, professional) ----
+val AppPrimary = Color(0xFF5C7AEA)          // Soft indigo blue
+val AppPrimaryContainer = Color(0xFF3E5FC4) // Deeper blue (for gradient/depth)
+val AppBackground = Color(0xFFF5F7FB)       // Soft off-white
 val AppSurface = Color(0xFFFFFFFF)
-val AppFolderCardColor = Color(0xFFFCF2DC)
-val AppButtonColor = Color(0xFFF4A261)      // Orange
-val AppTextColor = Color(0xFF1B4332)
+val AppFolderCardColor = Color(0xFFFFF3E6)  // Soft warm cream
+val AppButtonColor = Color(0xFF4CAF93)       // Soft emerald/teal
+val AppTextColor = Color(0xFF2D3142)         // Charcoal navy
 
 private val AppColorScheme = lightColorScheme(
     primary = AppPrimary,
-    onPrimary = AppTextColor,
+    onPrimary = Color.White,
     primaryContainer = AppPrimaryContainer,
-    onPrimaryContainer = AppTextColor,
+    onPrimaryContainer = Color.White,
     secondary = AppButtonColor,
     onSecondary = Color.White,
     background = AppBackground,
     onBackground = AppTextColor,
     surface = AppSurface,
     onSurface = AppTextColor,
-    surfaceVariant = Color(0xFFF1F8F1),
+    surfaceVariant = Color(0xFFF1F3F9),
 )
 
 private val AppShapes = Shapes(
